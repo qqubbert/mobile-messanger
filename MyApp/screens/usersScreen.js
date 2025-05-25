@@ -1,8 +1,7 @@
 import { View, StyleSheet, ScrollView } from 'react-native';
 import UserCard from '../entities/userCard';
-// import { API_URL } from '@env';
-import { API_URL } from '../MainApp';
-import { useState, useEffect, useContext, useCallback } from 'react';
+import { API_URL, WS_URL } from '../MainApp';
+import { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { UserContext } from '../context/userData';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -12,10 +11,11 @@ export default function UsersScreen({}) {
   const navigation = useNavigation();
 
   const currentUserId = userData.id;
+  const ws = useRef(null);
 
   const handleUserPress = async (targetUser) => {
     try {
-      // 1. Попробовать найти чат
+      // Попытка найти чат
       const response = await fetch(`${API_URL}get-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,8 +29,7 @@ export default function UsersScreen({}) {
       const chat = await response.json();
       console.log('Чат найден или создан:', chat);
 
-      // 2. Перейти к экрану чата
-      // Например, если используешь react-navigation:
+      // Перейти к экрану чата
       navigation.navigate("ChatView", {
           chatId: chat.id,
           chatName: targetUser.username
@@ -61,18 +60,39 @@ export default function UsersScreen({}) {
       console.log("Ошибка сети: ", error);
     }
   };
-  
-  // useEffect(()=>{
-  //   console.log(`${API_URL}users`);
-  //   console.log('trying to get users');
-  //   getUsers();
-  // }, []);
 
   useFocusEffect(
     useCallback(() => {
       getUsers();
     }, [])
   );
+
+  useEffect(() => {
+      ws.current = new WebSocket(WS_URL);
+  
+      ws.current.onopen = () => { 
+        console.log('WebSocket connected');
+      };
+  
+      ws.current.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        
+        if (data.type === 'new_user') {
+          // Обновляем локальные сообщения новым сообщением
+          getUsers();
+        }
+  
+        // Можно добавить обработку новых чатов и других типов событий
+      };
+  
+      ws.current.onclose = () => {
+        console.log('WebSocket disconnected');
+      };
+  
+      return () => {
+        ws.current.close();
+      };
+    }, []);
 
   return (
     <View style={styles.container}>
@@ -81,7 +101,6 @@ export default function UsersScreen({}) {
           <UserCard
             key={i}
             name={user.username}
-            status="Онлайн"
             onPress={() => {console.log('Переход к чату'); handleUserPress(user)}}
           />
         ))}
@@ -92,7 +111,7 @@ export default function UsersScreen({}) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Обязательно, чтобы ScrollView занимал весь экран
+    flex: 1,
     backgroundColor: '#fff',
   },
   scrollContent: {

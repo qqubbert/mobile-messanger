@@ -8,9 +8,9 @@ const http = require('http');
 dotenv.config();
 
 const corsOptions = {
-  origin: 'http://localhost:8081', // можно указать массив доменов: ['https://a.com', 'https://b.com']
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // какие методы разрешены
-  credentials: true, // если нужно передавать куки
+  origin: 'http://localhost:8081', // массив разрешённых подключений
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // разрешённые методы
+  credentials: true, // для куки
 };
 
 const app = express();
@@ -26,7 +26,6 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     console.log('Received:', message);
-    // Тут можно обработать сообщения от клиента (если нужно)
   });
 
   ws.on('close', () => {
@@ -34,8 +33,9 @@ wss.on('connection', (ws) => {
   });
 });
 
-// В дальнейшем для отправки сообщений всем подключенным клиентам:
+// Для отправки сообщений всем подключенным клиентам:
 function broadcast(data) {
+  console.log('broadcasting', data)
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(data));
@@ -45,23 +45,13 @@ function broadcast(data) {
 
 const PORT = process.env.PORT || 3000;
 
-// 🔹 Создание пользователя
-// app.post('/users', async (req, res) => {
-//   const { username, email } = req.body;
-//   const result = await pool.query(
-//     'INSERT INTO users (username, email) VALUES ($1, $2) RETURNING *',
-//     [username, email]
-//   );
-//   res.json(result.rows[0]);
-// });
-
-// 🔹 Получение всех пользователей
+// Получение всех пользователей
 app.get('/users', async (req, res) => {
   const result = await pool.query('SELECT * FROM users');
   res.json(result.rows);
 });
 
-// 🔹 Создание чата
+// Создание чата
 app.post('/chats', async (req, res) => {
   const { user1_id, user2_id } = req.body;
 
@@ -79,6 +69,7 @@ app.post('/chats', async (req, res) => {
   res.json(chat.rows[0]);
 });
 
+// Получение данных о конкретном чате или создание нового
 app.post('/get-chat', async (req, res) => {
   const { user1_id, user2_id } = req.body;
 
@@ -108,7 +99,7 @@ app.post('/get-chat', async (req, res) => {
   res.json({ id: chatId });
 });
 
-// 🔹 Получение всех чатов пользователя с логинами участников и последним сообщением
+// Получение всех чатов пользователя с логинами участников и последним сообщением
 app.get('/users/:userId/chats', async (req, res) => {
   const userId = req.params.userId;
 
@@ -152,7 +143,7 @@ app.get('/users/:userId/chats', async (req, res) => {
   res.json(chats);
 });
 
-// 🔹 Получение участников чата
+// Получение участников чата
 app.get('/chats/:chatId/participants', async (req, res) => {
   const chatId = req.params.chatId;
   const result = await pool.query(
@@ -166,7 +157,7 @@ app.get('/chats/:chatId/participants', async (req, res) => {
   res.json(result.rows);
 });
 
-// 🔹 Отправка сообщения
+// Отправка сообщения
 app.post('/chats/:chatId/messages', async (req, res) => {
   const { userId, content } = req.body;
   const chatId = req.params.chatId;
@@ -188,7 +179,7 @@ app.post('/chats/:chatId/messages', async (req, res) => {
   res.json(result.rows[0]);
 });
 
-// 🔹 Получение сообщений чата
+// Получение сообщений чата
 app.get('/chats/:chatId/messages', async (req, res) => {
   const chatId = req.params.chatId;
   const result = await pool.query(
@@ -203,7 +194,7 @@ app.get('/chats/:chatId/messages', async (req, res) => {
   res.json(result.rows);
 });
 
-// 🔹 Регистрация
+// Регистрация
 app.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
   console.log(username)
@@ -220,9 +211,11 @@ app.post('/register', async (req, res) => {
   res.json(result.rows[0]);
 });
 
-// 🔹 Авторизация без хеширования
+// Авторизация без хеширования
 app.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
+  console.log("email: ", email)
+  console.log("password: ", password)
 
   const result = await pool.query(
     'SELECT id, username, email FROM users WHERE email = $1 AND pass = $2',
@@ -233,9 +226,10 @@ app.post('/auth/login', async (req, res) => {
     return res.status(401).json({ error: 'Неверный email или пароль' });
   }
 
-  res.json(result.rows[0]); // возвращаем пользователя без пароля
+  res.json(result.rows[0]); // Возвращаем данные пользователя
 });
 
-app.listen(PORT, () => {
+// Запуск сервера
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

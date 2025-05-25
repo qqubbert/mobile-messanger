@@ -28,7 +28,7 @@ export default function ChatViewScreen({ route }) {
           isOwn: msg.user_id === userData.id
         }));
         setMessages(messagesWithOwnership);
-        console.log("messagesWithOwnership: ", messagesWithOwnership);
+        // console.log("messagesWithOwnership: ", messagesWithOwnership);
       } else {
         console.log("Ошибка при запросе сообщений");
       }
@@ -38,7 +38,7 @@ export default function ChatViewScreen({ route }) {
   }
 
   useEffect(() => {
-    ws.current = new WebSocket(`ws://${WS_URL}`);
+    ws.current = new WebSocket(WS_URL);
 
     ws.current.onopen = () => { 
       console.log('WebSocket connected');
@@ -62,7 +62,7 @@ export default function ChatViewScreen({ route }) {
     return () => {
       ws.current.close();
     };
-  }, [chatId]);
+  }, []);
 
   async function sendMessage() {
     if (newMessage.trim() === '') return;
