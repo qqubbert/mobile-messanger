@@ -34,6 +34,7 @@ export default function ChatsScreen() {
   useFocusEffect(
     useCallback(() => {
       getChats();
+      wsConnect();
     }, [])
   );
 
@@ -41,7 +42,7 @@ export default function ChatsScreen() {
     getChats();
   }, [])
 
-  useEffect(() => {
+  const wsConnect = () => {
     ws.current = new WebSocket(WS_URL);
 
     ws.current.onopen = () => { 
@@ -66,7 +67,7 @@ export default function ChatsScreen() {
     return () => {
       ws.current.close();
     };
-  }, []);
+  }
 
   return (
     <View style={styles.container}> 
