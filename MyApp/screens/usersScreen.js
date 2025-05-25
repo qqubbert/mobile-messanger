@@ -64,35 +64,36 @@ export default function UsersScreen({}) {
   useFocusEffect(
     useCallback(() => {
       getUsers();
+      wsConnect();
     }, [])
   );
 
-  useEffect(() => {
-      ws.current = new WebSocket(WS_URL);
+  const wsConnect = () => {
+    ws.current = new WebSocket(WS_URL);
   
-      ws.current.onopen = () => { 
-        console.log('WebSocket connected');
-      };
-  
-      ws.current.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        
-        if (data.type === 'new_user') {
-          // Обновляем локальные сообщения новым сообщением
-          getUsers();
-        }
-  
-        // Можно добавить обработку новых чатов и других типов событий
-      };
-  
-      ws.current.onclose = () => {
-        console.log('WebSocket disconnected');
-      };
-  
-      return () => {
-        ws.current.close();
-      };
-    }, []);
+    ws.current.onopen = () => { 
+      console.log('WebSocket connected');
+    };
+
+    ws.current.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      
+      if (data.type === 'new_user') {
+        // Обновляем локальные сообщения новым сообщением
+        getUsers();
+      }
+
+      // Можно добавить обработку новых чатов и других типов событий
+    };
+
+    ws.current.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+
+    return () => {
+      ws.current.close();
+    };
+  }
 
   return (
     <View style={styles.container}>

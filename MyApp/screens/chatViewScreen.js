@@ -3,8 +3,9 @@ import MessageCard from '../entities/messageCard';
 // import { API_URL } from '@env';
 import { API_URL } from '../MainApp';
 import { WS_URL } from '../MainApp';
-import { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { UserContext } from '../context/userData';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function ChatViewScreen({ route }) {
   const { chatId, chatName } = route.params;
@@ -37,7 +38,7 @@ export default function ChatViewScreen({ route }) {
     }
   }
 
-  useEffect(() => {
+  const wsConnect = () => {
     ws.current = new WebSocket(WS_URL);
 
     ws.current.onopen = () => { 
@@ -49,6 +50,7 @@ export default function ChatViewScreen({ route }) {
       
       if (data.type === 'new_message') {
         // Обновляем локальные сообщения новым сообщением
+        console.log('new_message')
         getMessages();
       }
 
@@ -62,7 +64,13 @@ export default function ChatViewScreen({ route }) {
     return () => {
       ws.current.close();
     };
-  }, []);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      wsConnect();
+    }, [])
+  );
 
   async function sendMessage() {
     if (newMessage.trim() === '') return;
