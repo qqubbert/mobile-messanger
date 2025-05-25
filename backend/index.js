@@ -35,6 +35,7 @@ wss.on('connection', (ws) => {
 
 // Для отправки сообщений всем подключенным клиентам:
 function broadcast(data) {
+  console.log('broadcasting', data)
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(data));
@@ -229,6 +230,6 @@ app.post('/auth/login', async (req, res) => {
 });
 
 // Запуск сервера
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

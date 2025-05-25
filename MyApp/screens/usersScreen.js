@@ -1,7 +1,7 @@
 import { View, StyleSheet, ScrollView } from 'react-native';
 import UserCard from '../entities/userCard';
-import { API_URL } from '../MainApp';
-import { useState, useEffect, useContext, useCallback } from 'react';
+import { API_URL, WS_URL } from '../MainApp';
+import { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { UserContext } from '../context/userData';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -11,6 +11,7 @@ export default function UsersScreen({}) {
   const navigation = useNavigation();
 
   const currentUserId = userData.id;
+  const ws = useRef(null);
 
   const handleUserPress = async (targetUser) => {
     try {
@@ -65,6 +66,33 @@ export default function UsersScreen({}) {
       getUsers();
     }, [])
   );
+
+  useEffect(() => {
+      ws.current = new WebSocket(WS_URL);
+  
+      ws.current.onopen = () => { 
+        console.log('WebSocket connected');
+      };
+  
+      ws.current.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        
+        if (data.type === 'new_user') {
+          // Обновляем локальные сообщения новым сообщением
+          getUsers();
+        }
+  
+        // Можно добавить обработку новых чатов и других типов событий
+      };
+  
+      ws.current.onclose = () => {
+        console.log('WebSocket disconnected');
+      };
+  
+      return () => {
+        ws.current.close();
+      };
+    }, []);
 
   return (
     <View style={styles.container}>
