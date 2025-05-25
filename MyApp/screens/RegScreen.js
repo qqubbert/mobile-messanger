@@ -36,7 +36,6 @@ export default function RegScreen({ navigation }) {
       }
 
       const user = await response.json();
-      // Alert.alert('Успешно', 'Регистрация прошла успешно');
       setIsLogged(true);
       setUserData(user);
     } catch (error) {

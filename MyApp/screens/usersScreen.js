@@ -1,6 +1,5 @@
 import { View, StyleSheet, ScrollView } from 'react-native';
 import UserCard from '../entities/userCard';
-// import { API_URL } from '@env';
 import { API_URL } from '../MainApp';
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { UserContext } from '../context/userData';
@@ -15,7 +14,7 @@ export default function UsersScreen({}) {
 
   const handleUserPress = async (targetUser) => {
     try {
-      // 1. Попробовать найти чат
+      // Попытка найти чат
       const response = await fetch(`${API_URL}get-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,8 +28,7 @@ export default function UsersScreen({}) {
       const chat = await response.json();
       console.log('Чат найден или создан:', chat);
 
-      // 2. Перейти к экрану чата
-      // Например, если используешь react-navigation:
+      // Перейти к экрану чата
       navigation.navigate("ChatView", {
           chatId: chat.id,
           chatName: targetUser.username
@@ -61,12 +59,6 @@ export default function UsersScreen({}) {
       console.log("Ошибка сети: ", error);
     }
   };
-  
-  // useEffect(()=>{
-  //   console.log(`${API_URL}users`);
-  //   console.log('trying to get users');
-  //   getUsers();
-  // }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -81,7 +73,6 @@ export default function UsersScreen({}) {
           <UserCard
             key={i}
             name={user.username}
-            status="Онлайн"
             onPress={() => {console.log('Переход к чату'); handleUserPress(user)}}
           />
         ))}
@@ -92,7 +83,7 @@ export default function UsersScreen({}) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Обязательно, чтобы ScrollView занимал весь экран
+    flex: 1,
     backgroundColor: '#fff',
   },
   scrollContent: {

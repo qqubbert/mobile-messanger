@@ -6,7 +6,7 @@ export default function UserCard({ name, status, avatar, onPress }) {
       {/* <Image source={{ uri: avatar }} style={styles.avatar} /> */}
       <View style={styles.info}>
         <Text style={styles.name}>{name}</Text>
-        <Text style={styles.status}>{status}</Text>
+        {/* <Text style={styles.status}>{status}</Text> */}
       </View>
     </TouchableOpacity>
   );
