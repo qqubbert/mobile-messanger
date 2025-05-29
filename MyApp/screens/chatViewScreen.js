@@ -29,7 +29,7 @@ export default function ChatViewScreen({ route }) {
           isOwn: msg.user_id === userData.id
         }));
         setMessages(messagesWithOwnership);
-        // console.log("messagesWithOwnership: ", messagesWithOwnership);
+        console.log("messagesWithOwnership: ", messagesWithOwnership);
       } else {
         console.log("Ошибка при запросе сообщений");
       }
@@ -111,7 +111,7 @@ export default function ChatViewScreen({ route }) {
             key={message.id}
             username={message.username}
             content={message.content}
-            time={message.time || "14:30"}
+            time={message.created_at.slice(11, 16) || "14:30"}
             isOwn={message.isOwn}
           />
         ))}
